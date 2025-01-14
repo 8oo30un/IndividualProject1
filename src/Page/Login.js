@@ -13,6 +13,9 @@ const LoginPage = () => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
+      // 로그인한 사용자의 프로필 사진 URL
+      const profilePicUrl = user.photoURL;
+
       if (user) {
         // 로그인 후 user.displayName에 저장된 이름을 UserPage로 전달
         navigate('/user', { state: { userName: user.displayName } });

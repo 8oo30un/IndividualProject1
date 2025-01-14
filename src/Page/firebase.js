@@ -1,6 +1,8 @@
 // firebase.js 파일을 Firebase v9 이상의 모듈식 API에 맞게 수정
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+
 
 // Firebase 설정
 const firebaseConfig = {
@@ -13,14 +15,8 @@ const firebaseConfig = {
   measurementId: "G-CRQ4ZFT7QF"
 };
 
-// // Firebase 초기화
-// if (!firebase.apps.length) {
-//   firebase.initializeApp(firebaseConfig);
-// } else {
-//   firebase.app();
-// }
-
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const firestore = getFirestore(app);
 
-export { auth,GoogleAuthProvider, signInWithPopup };
+export { auth,GoogleAuthProvider, signInWithPopup, firestore };
