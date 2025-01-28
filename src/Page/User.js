@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { auth, firestore } from './firebase';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import SideBar from '../Component/SiderBar';
 import { doc, collection, addDoc, getDocs, deleteDoc } from 'firebase/firestore';
 import styled from 'styled-components';
@@ -27,11 +27,6 @@ const UserPage = () => {
 
     return () => unsubscribe();
   }, [navigate, user]);
-
-  const handleLogout = async () => {
-    await auth.signOut();
-    navigate('/login'); // 로그아웃 후 로그인 페이지로 리디렉션
-  };
 
   // 메모 저장 함수
   const handleSaveMemo = async () => {

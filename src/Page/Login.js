@@ -1,6 +1,6 @@
-import React from 'react';
-import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -13,15 +13,12 @@ const LoginPage = () => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // 로그인한 사용자의 프로필 사진 URL
-      const profilePicUrl = user.photoURL;
-
       if (user) {
         // 로그인 후 user.displayName에 저장된 이름을 UserPage로 전달
-        navigate('/user', { state: { userName: user.displayName } });
+        navigate("/user", { state: { userName: user.displayName } });
       }
     } catch (error) {
-      console.error('로그인 오류:', error.message);
+      console.error("로그인 오류:", error.message);
     }
   };
 
