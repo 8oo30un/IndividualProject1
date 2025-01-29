@@ -1,8 +1,8 @@
-// firebase.js 파일을 Firebase v9 이상의 모듈식 API에 맞게 수정
+// firebase.js
+
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-
+import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDocs } from 'firebase/firestore';
 
 // Firebase 설정
 const firebaseConfig = {
@@ -15,8 +15,62 @@ const firebaseConfig = {
   measurementId: "G-CRQ4ZFT7QF"
 };
 
+// Firebase 초기화
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore(app);
 
-export { auth,GoogleAuthProvider, signInWithPopup, firestore };
+// Firestore에서 이벤트 가져오기
+const fetchEvents = async () => {
+  const eventsRef = collection(firestore, "events");
+  const querySnapshot = await getDocs(eventsRef);
+  const fetchedEvents = querySnapshot.docs.map(doc => ({
+    id: doc.id,
+    title: doc.data().title,
+    date: doc.data().date,
+  }));
+  return fetchedEvents;
+};
+
+// Firestore에 이벤트 추가
+const addEvent = async (newEvent) => {
+  try {
+    const docRef = await addDoc(collection(firestore, "events"), newEvent);
+    return { ...newEvent, id: docRef.id };
+  } catch (error) {
+    console.error("Error adding event: ", error);
+    throw error;
+  }
+};
+
+// Firestore에서 이벤트 업데이트
+const updateEvent = async (eventId, updatedTitle) => {
+  try {
+    const eventRef = doc(firestore, "events", eventId);
+    await updateDoc(eventRef, { title: updatedTitle });
+  } catch (error) {
+    console.error("Error updating event: ", error);
+    throw error;
+  }
+};
+
+// Firestore에서 이벤트 삭제
+const deleteEvent = async (eventId) => {
+  try {
+    await deleteDoc(doc(firestore, "events", eventId));
+  } catch (error) {
+    console.error("Error deleting event: ", error);
+    throw error;
+  }
+};
+
+export {
+  auth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  firestore,
+  fetchEvents,
+  addEvent,
+  updateEvent,
+  deleteEvent
+};
