@@ -16,6 +16,7 @@ const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [newTitle, setNewTitle] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
+  const [maxRowHeight, setMaxRowHeight] = useState(0);
 
   useEffect(() => {
     const loadEvents = async () => {
@@ -25,22 +26,12 @@ const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
     loadEvents();
   }, []);
 
-  const handleAddEvent = async (date) => {
-    if (!isEditMode) return;
-
-    console.log("Clicked date (raw):", date);
-
-    // 날짜를 로컬 시간으로 변환
-    const localDate = new Date(date);
-    localDate.setMinutes(
-      localDate.getMinutes() - localDate.getTimezoneOffset()
-    ); // UTC 보정
-
-    const formattedDate = localDate.toISOString().split("T")[0];
-
-    const newEvent = { title: "New Event", date: formattedDate };
-    const addedEvent = await addEvent(newEvent);
-    setEvents([...events, addedEvent]);
+  const eventContent = (eventInfo) => {
+    return (
+      <EventWrapper>
+        <EventText title={eventInfo.event.title}>{eventInfo.event.title}</EventText>
+      </EventWrapper>
+    );
   };
 
   const handleEventClick = (info) => {
@@ -61,67 +52,101 @@ const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
     setIsModalOpen(false);
   };
 
+  const handleAddEvent = async (date) => {
+    if (!isEditMode) return;
+  
+    const localDate = new Date(date);
+    localDate.setMinutes(localDate.getMinutes() - localDate.getTimezoneOffset()); // UTC 보정
+  
+    const formattedDate = localDate.toISOString().split("T")[0];
+  
+    const newEvent = { title: "New Event", date: formattedDate };
+    const addedEvent = await addEvent(newEvent);
+  
+    setEvents((prevEvents) => {
+      const updatedEvents = [...prevEvents, addedEvent];
+      return updatedEvents;
+    });
+  };
+  
   const handleDeleteEvent = async () => {
     if (!selectedEvent) return;
+  
     await deleteEvent(selectedEvent.id);
-    setEvents((prevEvents) =>
-      prevEvents.filter((event) => event.id !== selectedEvent.id)
-    );
+    setEvents((prevEvents) => {
+      const updatedEvents = prevEvents.filter((event) => event.id !== selectedEvent.id);
+      return updatedEvents;
+    });
+  
+    setSelectedEvent(null);
     setIsModalOpen(false);
+  };
+  
+  // 날짜의 최대 높이를 계산하는 함수
+  const adjustMaxRowHeight = () => {
+    const rows = document.querySelectorAll(".fc-daygrid-day");
+    let maxHeight = 0;
+  
+    rows.forEach((row) => {
+      const height = row.scrollHeight;
+      if (height > maxHeight) maxHeight = height;
+    });
+  
+    setMaxRowHeight(maxHeight); // 최대 높이 업데이트
   };
 
   useEffect(() => {
-    // 컴포넌트가 마운트될 때 오늘 날짜를 setSelectedDate에 저장
+    // events가 변경될 때마다 높이 계산
+    adjustMaxRowHeight();
+  }, [events]); // events가 변경될 때마다 adjustMaxRowHeight 호출
+
+  useEffect(() => {
     const today = new Date();
-    const formattedDate = formatDateToKorean(today); // 한국어 형식으로 오늘 날짜 포맷
-    setSelectedDate(formattedDate); // 오늘 날짜를 setSelectedDate로 저장
+    const formattedDate = formatDateToKorean(today);
+    setSelectedDate(formattedDate);
 
-  // 오늘 날짜에 해당하는 이벤트들을 setSelectedEvents에 저장
-  const todayEvents = events.filter(
-    (event) => new Date(event.date).toDateString() === today.toDateString()
-  );
-  setSelectedEvents(todayEvents); // 오늘 날짜에 해당하는 이벤트들 저장
-}, [events, setSelectedDate, setSelectedEvents]); // events가 변경될 때마다 실행되도록 의존성 배열 추가
-
+    const todayEvents = events.filter(
+      (event) => new Date(event.date).toDateString() === today.toDateString()
+    );
+    setSelectedEvents(todayEvents);
+  }, [events, setSelectedDate, setSelectedEvents]);
 
   const formatDateToKorean = (date) => {
     const options = {
       year: "numeric",
       month: "long",
       day: "numeric",
-      weekday: "long", // 요일 포함
+      weekday: "long",
     };
     return new Intl.DateTimeFormat("ko-KR", options).format(date);
   };
 
   const handleDateClick = (info) => {
     const clickedDate = info.date;
-    const formattedDate = formatDateToKorean(clickedDate); // 클릭한 날짜를 한국어 형식으로 포맷
-    setSelectedDate(formattedDate); // 클릭된 날짜를 setSelectedDate로 저장
+    const formattedDate = formatDateToKorean(clickedDate);
+    setSelectedDate(formattedDate);
 
     if (isEditMode) {
-      // edit 버튼이 활성화되어 있을 때만 handleAddEvent 호출
       handleAddEvent(clickedDate);
     }
 
-    // 클릭된 날짜에 해당하는 이벤트들을 필터링하여 setSelectedEvents에 저장
     const selectedDateEvents = events.filter(
       (event) => new Date(event.date).toDateString() === clickedDate.toDateString()
     );
-    setSelectedEvents(selectedDateEvents); // 클릭된 날짜에 해당하는 이벤트들 저장
+    setSelectedEvents(selectedDateEvents);
   };
 
-  
   return (
     <Container isEditMode={isEditMode}>
       <CalendarWrapper>
-        <GlobalStyles />
+        <GlobalStyles maxRowHeight={maxRowHeight} />
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
           events={events}
+          eventContent={eventContent}
           eventClick={handleEventClick}
-          dateClick={handleDateClick} // dateClick 이벤트 핸들러에 handleDateClick 추가
+          dateClick={handleDateClick}
           height="100%"
           contentHeight="auto"
           aspectRatio={1.5}
@@ -144,19 +169,6 @@ const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
               args.date.getMonth() === today.getMonth() &&
               args.date.getFullYear() === today.getFullYear();
             return isToday ? "today-cell" : "";
-          }}
-          eventContent={(eventInfo) => {
-            return (
-              <div
-                style={{
-                  backgroundColor: "#705C53",
-                  color: "white",
-                  padding: "5px",
-                }}
-              >
-                {eventInfo.event.title}
-              </div>
-            );
           }}
         />
       </CalendarWrapper>
@@ -198,29 +210,11 @@ const Container = styled.div`
 
 const CalendarWrapper = styled.div`
   margin-top: 40px;
-  // margin-left: 40px;
-  // margin-right: 40px;
   width: 95%;
-  height: 100vh; // 화면 전체 높이
+  height: 100vh;
   display: flex;
   flex-direction: column;
 `;
-
-// const Header = styled.div`
-// border: 1px solid black;
-//   display: flex;
-//   justify-content: center;
-//   padding: 10px;
-// `;
-
-// const EditButton = styled.button`
-//   padding: 8px 12px;
-//   background: #007bff;
-//   color: white;
-//   border: none;
-//   border-radius: 4px;
-//   cursor: pointer;
-// `;
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -300,7 +294,35 @@ const GlobalStyles = createGlobalStyle`
     background-color: #9a9a9a !important;
   }
 
-    .today-cell {
-    background-color: #b7b7b7 !important; /* 오늘 날짜의 배경색을 노란색으로 설정 */
+  .today-cell {
+    background-color: #b7b7b7 !important;
   }
+
+  .fc-event-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .fc-daygrid-day {
+    height: ${(props) => props.maxRowHeight}px !important;
+  }
+`;
+
+const EventWrapper = styled.div`
+  background-color: #705C53;
+  color: white;
+  padding: 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+`;
+
+const EventText = styled.span`
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
