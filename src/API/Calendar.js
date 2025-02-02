@@ -84,21 +84,27 @@ const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
   
   // 날짜의 최대 높이를 계산하는 함수
   const adjustMaxRowHeight = () => {
-    const rows = document.querySelectorAll(".fc-daygrid-day");
-    let maxHeight = 0;
+    setMaxRowHeight(0); // 높이를 초기화하여 다시 계산할 수 있도록 함
   
-    rows.forEach((row) => {
-      const height = row.scrollHeight;
-      if (height > maxHeight) maxHeight = height;
-    });
+    setTimeout(() => {
+      const rows = document.querySelectorAll(".fc-daygrid-day");
+      let maxHeight = 0;
   
-    setMaxRowHeight(maxHeight); // 최대 높이 업데이트
+      rows.forEach((row) => {
+        const height = row.scrollHeight;
+        if (height > maxHeight) maxHeight = height;
+      });
+  
+      setMaxRowHeight(maxHeight);
+    }, 50); // DOM 업데이트 후 실행되도록 약간의 딜레이 추가
   };
 
   useEffect(() => {
-    // events가 변경될 때마다 높이 계산
-    adjustMaxRowHeight();
-  }, [events]); // events가 변경될 때마다 adjustMaxRowHeight 호출
+    requestAnimationFrame(() => {
+      adjustMaxRowHeight();
+    });
+  }, [events]);
+  
 
   useEffect(() => {
     const today = new Date();
