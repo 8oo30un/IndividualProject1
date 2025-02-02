@@ -47,15 +47,6 @@ const Container = styled.div`
 `;
 
 export default SideBar;
-// SideBar.js import React from 'react'; import { useUser } from
-// '../API/UserContext'; import styled from 'styled-components'; const SideBar =
-// () => {   const user = useUser();   return (     <SidebarContainer>
-// {user ? (         <UserInfo>           <UserIconImg src={user.photoURL}
-// alt="Profile" />           <span>{user.displayName || '닉네임 없음'}</span>
-// </UserInfo>       ) : (         <p>로그인 정보를 불러오는 중...</p>       )}
-// </SidebarContainer>   ); }; const SidebarContainer = styled.div`   width:
-// 250px;   height: 100%;   background-color: #f4f4f4;   border-right: 1px solid
-// #ccc;   padding: 10px; `;
 
 const UserName = styled.div`
 

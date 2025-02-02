@@ -174,8 +174,8 @@ const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
               args.date.getDate() === today.getDate() &&
               args.date.getMonth() === today.getMonth() &&
               args.date.getFullYear() === today.getFullYear();
-            return isToday ? "today-cell" : "";
-          }}
+              return isToday ? "today-cell hoverable-cell" : "hoverable-cell";
+            }}
         />
       </CalendarWrapper>
 
@@ -312,6 +312,12 @@ const GlobalStyles = createGlobalStyle`
 
   .fc-daygrid-day {
     height: ${(props) => props.maxRowHeight}px !important;
+  }
+
+    /* 날짜 셀에 호버 효과 추가 */
+  .hoverable-cell:hover {
+    background-color: #e0e0e0 !important; /* 원하는 색상으로 변경 */
+    transition: background-color 0.3s ease;
   }
 `;
 

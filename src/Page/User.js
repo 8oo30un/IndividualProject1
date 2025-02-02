@@ -6,6 +6,7 @@ import { doc, collection, addDoc, getDocs, deleteDoc } from 'firebase/firestore'
 import styled from 'styled-components';
 import MyFullCalendar from '../API/Calendar';
 import EventContainer from '../API/EventContainer';
+import RightBar from '../Component/RightBar';
 
 const UserPage = () => {
   const navigate = useNavigate();
@@ -74,6 +75,7 @@ const UserPage = () => {
       {user ? (
         <div>
           <SideBar />
+          <RightBar />
           <PageConatainer>
             <FunctionConatianer>
               <CalendarConatainer>
@@ -173,7 +175,7 @@ ul {
   li {
     width: 48.5%; /* 메모 항목의 가로 크기 */
   min-height: 70px; /* 최소 높이를 설정 */
-  background-color: #fff44f;
+  background-color: #EDDFE0;
   margin-bottom: 8px;
   font-weight: bold;
   display: flex;
