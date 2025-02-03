@@ -28,8 +28,10 @@ const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
 
   const eventContent = (eventInfo) => {
     return (
-      <EventWrapper>
-        <EventText title={eventInfo.event.title}>{eventInfo.event.title}</EventText>
+      <EventWrapper data-tooltip={`◽  ${eventInfo.event.startStr} - ${eventInfo.event.title}`}>
+        <EventText title={eventInfo.event.title}>
+          {eventInfo.event.title}
+        </EventText>
       </EventWrapper>
     );
   };
@@ -54,47 +56,51 @@ const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
 
   const handleAddEvent = async (date) => {
     if (!isEditMode) return;
-  
+
     const localDate = new Date(date);
-    localDate.setMinutes(localDate.getMinutes() - localDate.getTimezoneOffset()); // UTC 보정
-  
+    localDate.setMinutes(
+      localDate.getMinutes() - localDate.getTimezoneOffset()
+    ); // UTC 보정
+
     const formattedDate = localDate.toISOString().split("T")[0];
-  
+
     const newEvent = { title: "New Event", date: formattedDate };
     const addedEvent = await addEvent(newEvent);
-  
+
     setEvents((prevEvents) => {
       const updatedEvents = [...prevEvents, addedEvent];
       return updatedEvents;
     });
   };
-  
+
   const handleDeleteEvent = async () => {
     if (!selectedEvent) return;
-  
+
     await deleteEvent(selectedEvent.id);
     setEvents((prevEvents) => {
-      const updatedEvents = prevEvents.filter((event) => event.id !== selectedEvent.id);
+      const updatedEvents = prevEvents.filter(
+        (event) => event.id !== selectedEvent.id
+      );
       return updatedEvents;
     });
-  
+
     setSelectedEvent(null);
     setIsModalOpen(false);
   };
-  
+
   // 날짜의 최대 높이를 계산하는 함수
   const adjustMaxRowHeight = () => {
     setMaxRowHeight(0); // 높이를 초기화하여 다시 계산할 수 있도록 함
-  
+
     setTimeout(() => {
       const rows = document.querySelectorAll(".fc-daygrid-day");
       let maxHeight = 0;
-  
+
       rows.forEach((row) => {
         const height = row.scrollHeight;
         if (height > maxHeight) maxHeight = height;
       });
-  
+
       setMaxRowHeight(maxHeight);
     }, 50); // DOM 업데이트 후 실행되도록 약간의 딜레이 추가
   };
@@ -104,7 +110,6 @@ const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
       adjustMaxRowHeight();
     });
   }, [events]);
-  
 
   useEffect(() => {
     const today = new Date();
@@ -137,7 +142,8 @@ const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
     }
 
     const selectedDateEvents = events.filter(
-      (event) => new Date(event.date).toDateString() === clickedDate.toDateString()
+      (event) =>
+        new Date(event.date).toDateString() === clickedDate.toDateString()
     );
     setSelectedEvents(selectedDateEvents);
   };
@@ -174,8 +180,8 @@ const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
               args.date.getDate() === today.getDate() &&
               args.date.getMonth() === today.getMonth() &&
               args.date.getFullYear() === today.getFullYear();
-              return isToday ? "today-cell hoverable-cell" : "hoverable-cell";
-            }}
+            return isToday ? "today-cell hoverable-cell" : "hoverable-cell";
+          }}
         />
       </CalendarWrapper>
 
@@ -291,9 +297,15 @@ const GlobalStyles = createGlobalStyle`
     background-color: #705C53 !important;
     border: none !important;
     color: white !important;
-    padding: 8px 12px !important;
+    padding: 8px 10px !important;
     border-radius: 4px !important;
     font-size: 14px !important;
+        height: 35px !important; /* 버튼 높이 조절 */
+
+  }
+
+   .fc-button-group {
+    gap: 8px !important; /* 버튼 간격 조정 */
   }
 
   .fc-button:hover {
@@ -322,7 +334,7 @@ const GlobalStyles = createGlobalStyle`
 `;
 
 const EventWrapper = styled.div`
-  background-color: #705C53;
+  background-color: #705c53;
   color: white;
   padding: 5px;
   border-radius: 4px;
@@ -330,6 +342,22 @@ const EventWrapper = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+
+  &:hover::after {
+    content: attr(data-tooltip); /* data-tooltip 속성을 툴팁으로 표시 */
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    left: 50%;
+    bottom: 120%;
+    transform: translateX(-50%);
+    display: block;
+    z-index: 10;
+  }
 `;
 
 const EventText = styled.span`
@@ -337,4 +365,17 @@ const EventText = styled.span`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+`;
+
+const Tooltip = styled.div`
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  display: none;
+  z-index: 1000;
+  pointer-events: none;
 `;
