@@ -17,6 +17,8 @@ const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
   const [newTitle, setNewTitle] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
   const [maxRowHeight, setMaxRowHeight] = useState(0);
+  const [isHealthMode, setIsHealthMode] = useState(false);
+  const [healthEvents, setHealthEvents] = useState(new Set()); // 헬스 이벤트 ID 저장
 
   useEffect(() => {
     const loadEvents = async () => {
@@ -27,8 +29,12 @@ const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
   }, []);
 
   const eventContent = (eventInfo) => {
+    const isHealth = healthEvents.has(eventInfo.event.id);
     return (
-      <EventWrapper data-tooltip={`◽  ${eventInfo.event.startStr} - ${eventInfo.event.title}`}>
+      <EventWrapper
+        data-tooltip={`◽  ${eventInfo.event.startStr} - ${eventInfo.event.title}`}
+        isHealth={isHealth} // 스타일 변경을 위한 prop 전달
+      >
         <EventText title={eventInfo.event.title}>
           {eventInfo.event.title}
         </EventText>
@@ -148,6 +154,22 @@ const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
     setSelectedEvents(selectedDateEvents);
   };
 
+  const toggleHealthMode = async () => {
+    if (!selectedEvent) return;
+  
+    const updatedHealthEvents = new Set(healthEvents);
+    
+    if (updatedHealthEvents.has(selectedEvent.id)) {
+      updatedHealthEvents.delete(selectedEvent.id); // 헬스 모드 해제
+      alert("헬스 모드가 해제되었습니다.");
+    } else {
+      updatedHealthEvents.add(selectedEvent.id); // 헬스 모드 등록
+      alert("헬스 모드로 등록되었습니다!");
+    }
+  
+    setHealthEvents(updatedHealthEvents);
+  };
+
   return (
     <Container isEditMode={isEditMode}>
       <CalendarWrapper>
@@ -195,9 +217,12 @@ const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
               onChange={(e) => setNewTitle(e.target.value)}
             />
             <ButtonGroup>
+              <button onClick={toggleHealthMode}>
+                {isHealthMode ? "헬스 모드 해제" : "헬스 모드 등록"}
+              </button>
               <button onClick={handleUpdateEvent}>수정</button>
               <button onClick={handleDeleteEvent}>삭제</button>
-              <button onClick={() => setIsModalOpen(false)}>취소</button>
+              <button onClick={() => setIsModalOpen(false)}>닫기</button>
             </ButtonGroup>
           </ModalContent>
         </ModalOverlay>
@@ -334,7 +359,7 @@ const GlobalStyles = createGlobalStyle`
 `;
 
 const EventWrapper = styled.div`
-  background-color: #705c53;
+  background-color: ${(props) => (props.isHealth ? "#FF6B6B" : "#705C53")};
   color: white;
   padding: 5px;
   border-radius: 4px;
@@ -346,7 +371,7 @@ const EventWrapper = styled.div`
   &:hover::after {
     content: attr(data-tooltip); /* data-tooltip 속성을 툴팁으로 표시 */
     position: absolute;
-    background: rgba(0, 0, 0, 0.8);
+    background: ${(props) => (props.isHealth ? "#FF6B6B" : "#705C53")};
     color: white;
     padding: 6px 10px;
     border-radius: 4px;
@@ -367,15 +392,15 @@ const EventText = styled.span`
   text-overflow: ellipsis;
 `;
 
-const Tooltip = styled.div`
-  position: absolute;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 6px 10px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  display: none;
-  z-index: 1000;
-  pointer-events: none;
-`;
+// const Tooltip = styled.div`
+//   position: absolute;
+//   background: rgba(0, 0, 0, 0.8);
+//   color: white;
+//   padding: 6px 10px;
+//   border-radius: 4px;
+//   font-size: 12px;
+//   white-space: nowrap;
+//   display: none;
+//   z-index: 1000;
+//   pointer-events: none;
+// `;
