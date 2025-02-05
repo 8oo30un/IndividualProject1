@@ -1,8 +1,16 @@
 // firebase.js
 
-import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDocs } from 'firebase/firestore';
+import { initializeApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  getDocs,
+} from "firebase/firestore";
 
 // Firebase 설정
 const firebaseConfig = {
@@ -12,7 +20,7 @@ const firebaseConfig = {
   storageBucket: "kwhproject1.firebasestorage.app",
   messagingSenderId: "682417755259",
   appId: "1:682417755259:web:8bd91989e36d3629ef3ede",
-  measurementId: "G-CRQ4ZFT7QF"
+  measurementId: "G-CRQ4ZFT7QF",
 };
 
 // Firebase 초기화
@@ -24,7 +32,7 @@ const firestore = getFirestore(app);
 const fetchEvents = async () => {
   const eventsRef = collection(firestore, "events");
   const querySnapshot = await getDocs(eventsRef);
-  const fetchedEvents = querySnapshot.docs.map(doc => ({
+  const fetchedEvents = querySnapshot.docs.map((doc) => ({
     id: doc.id,
     title: doc.data().title,
     date: doc.data().date,
@@ -32,11 +40,33 @@ const fetchEvents = async () => {
   return fetchedEvents;
 };
 
+const fetchHealthEvents = async () => {
+  const eventsRef = collection(firestore, "events");
+  const querySnapshot = await getDocs(eventsRef);
+  const healthEventIds = querySnapshot.docs
+    .filter((doc) => doc.data().isHealth) // [수정됨] 헬스 모드 필터링
+    .map((doc) => doc.id);
+  return healthEventIds;
+};
+
+const updateHealthEvent = async (eventId, isHealth) => {
+  try {
+    const eventRef = doc(firestore, "events", eventId);
+    await updateDoc(eventRef, { isHealth }); // [수정됨] Firestore 업데이트
+  } catch (error) {
+    console.error("Error updating health event: ", error);
+    throw error;
+  }
+};
+
 // Firestore에 이벤트 추가
 const addEvent = async (newEvent) => {
   try {
-    const docRef = await addDoc(collection(firestore, "events"), newEvent);
-    return { ...newEvent, id: docRef.id };
+    const docRef = await addDoc(collection(firestore, "events"), {
+      ...newEvent,
+      isHealth: false, // [수정됨] 기본값 추가
+    });
+    return { ...newEvent, id: docRef.id, isHealth: false };
   } catch (error) {
     console.error("Error adding event: ", error);
     throw error;
@@ -72,5 +102,7 @@ export {
   fetchEvents,
   addEvent,
   updateEvent,
-  deleteEvent
+  deleteEvent,
+  fetchHealthEvents,
+  updateHealthEvent,
 };

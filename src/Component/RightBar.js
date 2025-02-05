@@ -25,13 +25,11 @@ const MainContainer = styled.div`
 const Box1 = styled.div`
   width: 100%;
   height: 50%;
-  background-color: red;
 `;
 
 const Box2 = styled.div`
   width: 100%;
   height: 50%;
-  background-color: blue;
 `;
 
 export default RightBar;

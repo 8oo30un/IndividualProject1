@@ -8,6 +8,8 @@ import {
   addEvent,
   updateEvent,
   deleteEvent,
+  fetchHealthEvents,
+  updateHealthEvent,
 } from "../Page/firebase";
 
 const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
@@ -17,13 +19,16 @@ const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
   const [newTitle, setNewTitle] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
   const [maxRowHeight, setMaxRowHeight] = useState(0);
-  const [isHealthMode, setIsHealthMode] = useState(false);
+  // const [isHealthMode, setIsHealthMode] = useState(false);
   const [healthEvents, setHealthEvents] = useState(new Set()); // 헬스 이벤트 ID 저장
 
   useEffect(() => {
     const loadEvents = async () => {
       const eventsFromFirebase = await fetchEvents();
       setEvents(eventsFromFirebase);
+
+      const healthEventsFromFirebase = await fetchHealthEvents(); // [수정됨] 헬스 이벤트 불러오기
+      setHealthEvents(new Set(healthEventsFromFirebase));
     };
     loadEvents();
   }, []);
@@ -156,17 +161,19 @@ const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
 
   const toggleHealthMode = async () => {
     if (!selectedEvent) return;
-  
+
     const updatedHealthEvents = new Set(healthEvents);
-    
+
     if (updatedHealthEvents.has(selectedEvent.id)) {
       updatedHealthEvents.delete(selectedEvent.id); // 헬스 모드 해제
+      await updateHealthEvent(selectedEvent.id, false); // [수정됨] Firestore 업데이트
       alert("헬스 모드가 해제되었습니다.");
     } else {
       updatedHealthEvents.add(selectedEvent.id); // 헬스 모드 등록
+      await updateHealthEvent(selectedEvent.id, true); // [수정됨] Firestore 업데이트
       alert("헬스 모드로 등록되었습니다!");
     }
-  
+
     setHealthEvents(updatedHealthEvents);
   };
 
@@ -218,7 +225,9 @@ const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
             />
             <ButtonGroup>
               <button onClick={toggleHealthMode}>
-                {isHealthMode ? "헬스 모드 해제" : "헬스 모드 등록"}
+                {healthEvents.has(selectedEvent?.id)
+                  ? "헬스 모드 해제"
+                  : "헬스 모드 등록"}
               </button>
               <button onClick={handleUpdateEvent}>수정</button>
               <button onClick={handleDeleteEvent}>삭제</button>
