@@ -10,16 +10,20 @@ import {
   deleteEvent,
   fetchHealthEvents,
   updateHealthEvent,
+  addRoutine,
+  fetchRoutines,
 } from "../Page/firebase";
 
 const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
   const [events, setEvents] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRoutineModalOpen, setIsRoutineModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [newTitle, setNewTitle] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
   const [maxRowHeight, setMaxRowHeight] = useState(0);
-  // const [isHealthMode, setIsHealthMode] = useState(false);
+  const [newRoutine, setNewRoutine] = useState("");
+  const [routines, setRoutines] = useState({});
   const [healthEvents, setHealthEvents] = useState(new Set()); // 헬스 이벤트 ID 저장
 
   useEffect(() => {
@@ -32,6 +36,38 @@ const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
     };
     loadEvents();
   }, []);
+
+  // 🔹 특정 이벤트의 루틴 불러오기
+  useEffect(() => {
+    if (selectedEvent) {
+      fetchRoutines(selectedEvent.id).then((routines) => {
+        setRoutines((prev) => ({ ...prev, [selectedEvent.id]: routines }));
+      });
+    }
+  }, [selectedEvent]);
+
+  // 🔹 루틴 추가 핸들러 (Firestore 저장 포함)
+  const handleAddRoutine = async () => {
+    if (!selectedEvent || !newRoutine.trim()) return;
+
+    await addRoutine(selectedEvent.id, newRoutine);
+
+    setRoutines((prevRoutines) => ({
+      ...prevRoutines,
+      [selectedEvent.id]: [
+        ...(prevRoutines[selectedEvent.id] || []),
+        newRoutine,
+      ],
+    }));
+    setNewRoutine(""); // 입력 필드 초기화
+  };
+
+  const handleDeleteRoutine = (routine) => {
+    setRoutines((prev) => ({
+      ...prev,
+      [selectedEvent.id]: prev[selectedEvent.id].filter((r) => r !== routine),
+    }));
+  };
 
   const eventContent = (eventInfo) => {
     const isHealth = healthEvents.has(eventInfo.event.id);
@@ -229,10 +265,38 @@ const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
                   ? "헬스 모드 해제"
                   : "헬스 모드 등록"}
               </button>
+              <button onClick={() => setIsRoutineModalOpen(true)}>
+                루틴 관리
+              </button>
               <button onClick={handleUpdateEvent}>수정</button>
               <button onClick={handleDeleteEvent}>삭제</button>
               <button onClick={() => setIsModalOpen(false)}>닫기</button>
             </ButtonGroup>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+
+      {isRoutineModalOpen && (
+        <ModalOverlay onClick={() => setIsRoutineModalOpen(false)}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <h3>루틴 관리</h3>
+            <input
+              type="text"
+              value={newRoutine}
+              onChange={(e) => setNewRoutine(e.target.value)}
+              placeholder="루틴 입력"
+            />
+            <button onClick={handleAddRoutine}>추가</button>
+            <ul>
+              {(routines[selectedEvent?.id] || []).map((routine, index) => (
+                <li key={index}>
+                  {routine}
+                  <button onClick={() => handleDeleteRoutine(routine)}>
+                    삭제
+                  </button>
+                </li>
+              ))}
+            </ul>
           </ModalContent>
         </ModalOverlay>
       )}

@@ -10,6 +10,7 @@ import {
   deleteDoc,
   doc,
   getDocs,
+  arrayUnion,
 } from "firebase/firestore";
 
 // Firebase 설정
@@ -94,6 +95,32 @@ const deleteEvent = async (eventId) => {
   }
 };
 
+// 🔹 Firestore에서 루틴 추가
+const addRoutine = async (eventId, newRoutine) => {
+  try {
+    const eventRef = doc(firestore, "events", eventId);
+    await updateDoc(eventRef, {
+      routines: arrayUnion(newRoutine), // Firestore 배열 필드 업데이트
+    });
+  } catch (error) {
+    console.error("Error adding routine: ", error);
+    throw error;
+  }
+};
+
+// 🔹 Firestore에서 이벤트의 루틴 가져오기
+const fetchRoutines = async (eventId) => {
+  try {
+    const eventRef = doc(firestore, "events", eventId);
+    const eventSnap = await getDocs(collection(firestore, "events"));
+    const eventData = eventSnap.docs.find((doc) => doc.id === eventId)?.data();
+    return eventData?.routines || [];
+  } catch (error) {
+    console.error("Error fetching routines: ", error);
+    throw error;
+  }
+};
+
 export {
   auth,
   GoogleAuthProvider,
@@ -105,4 +132,6 @@ export {
   deleteEvent,
   fetchHealthEvents,
   updateHealthEvent,
+  addRoutine,
+  fetchRoutines,
 };
