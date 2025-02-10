@@ -30,9 +30,7 @@ const UserPage = () => {
   const [selectedDate, setSelectedDate] = useRecoilState(selectedDateState);
   const [selectedEvents, setSelectedEvents] =
     useRecoilState(selectedEventsState);
-  const [selectedRoutines, setSelectedRoutines] = useRecoilState(
-    selectedRoutinesState
-  );
+  const [routines, setRoutines] = useRecoilState(selectedRoutinesState);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -109,7 +107,7 @@ const UserPage = () => {
                   <EventContainer
                     selectedDate={selectedDate || "선택된 날짜가 없습니다"}
                     selectedEvents={selectedEvents || []}
-                    selectedRoutines={selectedRoutines || []} // 추가
+                    routines={routines || []} // 추가
                   />
                 </TodayContainer>
                 <MemoContainer>

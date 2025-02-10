@@ -29,7 +29,6 @@ const MyFullCalendar = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [maxRowHeight, setMaxRowHeight] = useState(0);
   const [newRoutine, setNewRoutine] = useState("");
-  // const [routines, setRoutines] = useState({});
   const [healthEvents, setHealthEvents] = useState(new Set()); // 헬스 이벤트 ID 저장
 
   // Recoil 상태 사용
@@ -49,14 +48,21 @@ const MyFullCalendar = () => {
     loadEvents();
   }, []);
 
-  // 🔹 특정 이벤트의 루틴 불러오기
+  // 🔹 모든 이벤트에 대한 루틴 불러오기
   useEffect(() => {
-    if (selectedEvent) {
-      fetchRoutines(selectedEvent.id).then((routines) => {
-        setRoutines((prev) => ({ ...prev, [selectedEvent.id]: routines }));
-      });
+    const loadAllRoutines = async () => {
+      const allRoutines = {};
+      for (const event of events) {
+        const routinesForEvent = await fetchRoutines(event.id);
+        allRoutines[event.id] = routinesForEvent;
+      }
+      setRoutines(allRoutines); // 🔹 모든 루틴을 Recoil 상태에 저장
+      // console.log(allRoutines);
+    };
+    if (events.length > 0) {
+      loadAllRoutines(); // 이벤트가 로드되면 모든 루틴을 불러옴
     }
-  }, [selectedEvent, setRoutines]);
+  }, [events, setRoutines]);
 
   // 🔹 루틴 추가 핸들러 (Firestore 저장 포함)
   const handleAddRoutine = async () => {
@@ -64,6 +70,7 @@ const MyFullCalendar = () => {
 
     await addRoutine(selectedEvent.id, newRoutine);
 
+    // 🔹 모든 루틴을 Recoil 상태에 업데이트
     setRoutines((prevRoutines) => ({
       ...prevRoutines,
       [selectedEvent.id]: [
@@ -75,18 +82,26 @@ const MyFullCalendar = () => {
   };
 
   const handleDeleteRoutine = (routine) => {
-    setRoutines((prev) => ({
-      ...prev,
-      [selectedEvent.id]: prev[selectedEvent.id].filter((r) => r !== routine),
-    }));
+    // 🔹 Recoil 상태에서 루틴 삭제
+    setRoutines((prev) => {
+      const updatedRoutines = { ...prev };
+      updatedRoutines[selectedEvent.id] = updatedRoutines[
+        selectedEvent.id
+      ].filter((r) => r !== routine);
+      return updatedRoutines;
+    });
   };
 
   const eventContent = (eventInfo) => {
     const isHealth = healthEvents.has(eventInfo.event.id);
+    // const routinesForEvent = routines[eventInfo.event.id] || [];
+    // const routinesText =
+    //   routinesForEvent.length > 0 ? ` ${routinesForEvent.join(" ")}` : "";
+
     return (
       <EventWrapper
-        data-tooltip={`◽  ${eventInfo.event.startStr} - ${eventInfo.event.title}`}
-        isHealth={isHealth} // 스타일 변경을 위한 prop 전달
+        data-tooltip={`☁️  ${eventInfo.event.startStr} - ${eventInfo.event.title}`}
+        isHealth={isHealth}
       >
         <EventText title={eventInfo.event.title}>
           {eventInfo.event.title}
@@ -452,21 +467,44 @@ const EventWrapper = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+  position: relative; /* 부모 요소에서 툴팁을 절대 위치로 설정하기 위해 relative 추가 */
+  z-index: 10; /* EventWrapper의 z-index 추가 */
+
+  /* 부모 요소의 overflow가 hidden이라면 visible로 설정 */
+  overflow: visible;
 
   &:hover::after {
     content: attr(data-tooltip); /* data-tooltip 속성을 툴팁으로 표시 */
-    position: absolute;
+    position: fixed;
+    top: 10px; /* 화면 상단에 고정 */
+    left: 50%; /* 화면의 가운데에 정렬 */
+    transform: translateX(-50%); /* 중앙 정렬 */
     background: ${(props) => (props.isHealth ? "#FF6B6B" : "#705C53")};
     color: white;
     padding: 6px 10px;
     border-radius: 4px;
     font-size: 12px;
     white-space: nowrap;
-    left: 50%;
-    bottom: 120%;
-    transform: translateX(-50%);
     display: block;
-    z-index: 10;
+    z-index: 9999; /* 툴팁이 다른 요소 위에 뜨게 설정 */
+    pointer-events: none; /* 툴팁에서 클릭이 가능하지 않도록 설정 */
+    opacity: 0; /* 처음에는 투명하게 시작 */
+    transition: opacity 0.3s ease, top 0.3s ease; /* 애니메이션 추가 */
+
+    /* 애니메이션: 툴팁이 부드럽게 나타나도록 설정 */
+    animation: tooltip-animation 0.3s forwards;
+  }
+
+  /* 애니메이션 정의 */
+  @keyframes tooltip-animation {
+    0% {
+      opacity: 0;
+      top: 10px;
+    }
+    100% {
+      opacity: 1;
+      top: 50px; /* 애니메이션이 끝난 후 위치 */
+    }
   }
 `;
 
@@ -476,16 +514,3 @@ const EventText = styled.span`
   overflow: hidden;
   text-overflow: ellipsis;
 `;
-
-// const Tooltip = styled.div`
-//   position: absolute;
-//   background: rgba(0, 0, 0, 0.8);
-//   color: white;
-//   padding: 6px 10px;
-//   border-radius: 4px;
-//   font-size: 12px;
-//   white-space: nowrap;
-//   display: none;
-//   z-index: 1000;
-//   pointer-events: none;
-// `;
