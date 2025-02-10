@@ -13,7 +13,11 @@ import styled from "styled-components";
 import MyFullCalendar from "../API/Calendar";
 import EventContainer from "../API/EventContainer";
 import RightBar from "../Component/RightBar";
-import { selectedDateState, selectedEventsState } from "../State/recoilAtoms"; // recoil 상태 import
+import {
+  selectedDateState,
+  selectedEventsState,
+  selectedRoutinesState,
+} from "../State/recoilAtoms"; // recoil 상태 import
 import { useRecoilState } from "recoil";
 
 const UserPage = () => {
@@ -26,6 +30,9 @@ const UserPage = () => {
   const [selectedDate, setSelectedDate] = useRecoilState(selectedDateState);
   const [selectedEvents, setSelectedEvents] =
     useRecoilState(selectedEventsState);
+  const [selectedRoutines, setSelectedRoutines] = useRecoilState(
+    selectedRoutinesState
+  );
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -38,7 +45,7 @@ const UserPage = () => {
     });
 
     return () => unsubscribe();
-  }, [navigate, user]);
+  }, [navigate]);
 
   // 메모 저장 함수
   const handleSaveMemo = async () => {
@@ -102,6 +109,7 @@ const UserPage = () => {
                   <EventContainer
                     selectedDate={selectedDate || "선택된 날짜가 없습니다"}
                     selectedEvents={selectedEvents || []}
+                    selectedRoutines={selectedRoutines || []} // 추가
                   />
                 </TodayContainer>
                 <MemoContainer>

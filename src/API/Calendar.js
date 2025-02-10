@@ -13,7 +13,11 @@ import {
   addRoutine,
   fetchRoutines,
 } from "../Page/firebase";
-import { selectedDateState, selectedEventsState } from "../State/recoilAtoms"; // recoil 상태 import
+import {
+  selectedDateState,
+  selectedEventsState,
+  selectedRoutinesState,
+} from "../State/recoilAtoms"; // recoil 상태 import
 import { useRecoilState } from "recoil";
 
 const MyFullCalendar = () => {
@@ -25,13 +29,14 @@ const MyFullCalendar = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [maxRowHeight, setMaxRowHeight] = useState(0);
   const [newRoutine, setNewRoutine] = useState("");
-  const [routines, setRoutines] = useState({});
+  // const [routines, setRoutines] = useState({});
   const [healthEvents, setHealthEvents] = useState(new Set()); // 헬스 이벤트 ID 저장
 
   // Recoil 상태 사용
   const [selectedDate, setSelectedDate] = useRecoilState(selectedDateState);
   const [selectedEvents, setSelectedEvents] =
     useRecoilState(selectedEventsState);
+  const [routines, setRoutines] = useRecoilState(selectedRoutinesState);
 
   useEffect(() => {
     const loadEvents = async () => {
@@ -51,7 +56,7 @@ const MyFullCalendar = () => {
         setRoutines((prev) => ({ ...prev, [selectedEvent.id]: routines }));
       });
     }
-  }, [selectedEvent]);
+  }, [selectedEvent, setRoutines]);
 
   // 🔹 루틴 추가 핸들러 (Firestore 저장 포함)
   const handleAddRoutine = async () => {

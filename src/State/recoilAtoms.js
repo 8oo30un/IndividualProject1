@@ -11,3 +11,8 @@ export const selectedEventsState = atom({
   key: "selectedEventsState",
   default: [], // 초기 값은 빈 배열 (이벤트 목록)
 });
+
+export const selectedRoutinesState = atom({
+  key: "selectedRoutinesState",
+  default: {},
+});
