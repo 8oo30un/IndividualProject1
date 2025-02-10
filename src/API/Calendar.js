@@ -13,8 +13,10 @@ import {
   addRoutine,
   fetchRoutines,
 } from "../Page/firebase";
+import { selectedDateState, selectedEventsState } from "../State/recoilAtoms"; // recoil 상태 import
+import { useRecoilState } from "recoil";
 
-const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
+const MyFullCalendar = () => {
   const [events, setEvents] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRoutineModalOpen, setIsRoutineModalOpen] = useState(false);
@@ -25,6 +27,11 @@ const MyFullCalendar = ({ setSelectedDate, setSelectedEvents }) => {
   const [newRoutine, setNewRoutine] = useState("");
   const [routines, setRoutines] = useState({});
   const [healthEvents, setHealthEvents] = useState(new Set()); // 헬스 이벤트 ID 저장
+
+  // Recoil 상태 사용
+  const [selectedDate, setSelectedDate] = useRecoilState(selectedDateState);
+  const [selectedEvents, setSelectedEvents] =
+    useRecoilState(selectedEventsState);
 
   useEffect(() => {
     const loadEvents = async () => {
