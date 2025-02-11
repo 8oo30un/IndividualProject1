@@ -12,6 +12,7 @@ import {
   updateHealthEvent,
   addRoutine,
   fetchRoutines,
+  deleteRoutine,
 } from "../Page/firebase";
 import {
   selectedDateState,
@@ -81,7 +82,12 @@ const MyFullCalendar = () => {
     setNewRoutine(""); // 입력 필드 초기화
   };
 
-  const handleDeleteRoutine = (routine) => {
+  const handleDeleteRoutine = async (routine) => {
+    // Firestore에서 루틴 삭제
+    if (!selectedEvent) return;
+
+    await deleteRoutine(selectedEvent.id, routine); // Firestore에서 루틴 삭제 함수 호출
+
     // 🔹 Recoil 상태에서 루틴 삭제
     setRoutines((prev) => {
       const updatedRoutines = { ...prev };
@@ -297,7 +303,9 @@ const MyFullCalendar = () => {
               </button>
               <button onClick={handleUpdateEvent}>수정</button>
               <button onClick={handleDeleteEvent}>삭제</button>
-              <button onClick={() => setIsModalOpen(false)}>닫기</button>
+              <CloseButton onClick={() => setIsModalOpen(false)}>
+                ✖️ {/* Close button added */}
+              </CloseButton>
             </ButtonGroup>
           </ModalContent>
         </ModalOverlay>
@@ -306,7 +314,11 @@ const MyFullCalendar = () => {
       {isRoutineModalOpen && (
         <ModalOverlay onClick={() => setIsRoutineModalOpen(false)}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
-            <h3>루틴 관리</h3>
+            <H3Title>루틴 관리</H3Title> {/* 중앙 정렬된 h3 */}
+            <CloseButton onClick={() => setIsRoutineModalOpen(false)}>
+              ✖️
+            </CloseButton>
+            {/* Close button added */}
             <RoutineInputBox>
               <RoutineInput
                 type="text"
@@ -319,7 +331,7 @@ const MyFullCalendar = () => {
             <RoutineList>
               {(routines[selectedEvent?.id] || []).map((routine, index) => (
                 <RoutineItem key={index}>
-                  {routine}
+                  <RoutineText>{routine}</RoutineText>
                   <RoutineButton onClick={() => handleDeleteRoutine(routine)}>
                     ❎
                   </RoutineButton>
@@ -376,10 +388,18 @@ const ModalContent = styled.div`
   width: 300px;
   text-align: center;
   z-index: 1001;
+    position: relative; /* 부모에 상대 위치 지정 */
+  '
 
-  h3 {
-    margin-bottom: 10px;
-  }
+  // h3 {
+  // position: absolute;
+  // top: 10px;
+  // left: 50%;
+  // transform: translateX(-50%); /* 수평 중앙 정렬 */
+  // margin: 0;
+  // font-size: 18px; /* 필요에 따라 크기 조정 */
+    
+  // }
 
   input {
     width: 100%;
@@ -393,6 +413,7 @@ const ModalContent = styled.div`
 const ButtonGroup = styled.div`
   display: flex;
   justify-content: space-between;
+  margin-top: 20px;
 
   button {
     padding: 8px 12px;
@@ -531,11 +552,15 @@ const RoutineList = styled.ul`
 `;
 
 const RoutineInput = styled.input`
+  margin-top: 10px;
+  align-self: center;
+width: 100%;
   padding: 8px;
   margin-bottom: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box; /* 패딩 포함 높이 유지 */
+  wi
 `;
 
 const RoutineItem = styled.li`
@@ -554,4 +579,35 @@ const RoutineInputBox = styled.div`
   align-items: center;
   justify-content: space-between;
   margin-bottom: 10px;
+  margin-top: 20px;
+`;
+
+const RoutineText = styled.div`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background-color: solid black;
+`;
+
+const CloseButton = styled.button`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #333;
+  &:hover {
+    color: red;
+  }
+`;
+
+const H3Title = styled.h3`
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%); /* 수평 중앙 정렬 */
+  margin: 0;
+  font-size: 18px; /* 필요에 따라 크기 조정 */
 `;

@@ -11,6 +11,7 @@ import {
   doc,
   getDocs,
   arrayUnion,
+  arrayRemove,
 } from "firebase/firestore";
 
 // Firebase 설정
@@ -121,6 +122,19 @@ const fetchRoutines = async (eventId) => {
   }
 };
 
+// 🔹 Firestore에서 루틴 삭제
+const deleteRoutine = async (eventId, routineToDelete) => {
+  try {
+    const eventRef = doc(firestore, "events", eventId);
+    await updateDoc(eventRef, {
+      routines: arrayRemove(routineToDelete), // Firestore 배열에서 특정 루틴 제거
+    });
+  } catch (error) {
+    console.error("Error deleting routine: ", error);
+    throw error;
+  }
+};
+
 export {
   auth,
   GoogleAuthProvider,
@@ -134,4 +148,5 @@ export {
   updateHealthEvent,
   addRoutine,
   fetchRoutines,
+  deleteRoutine,
 };
