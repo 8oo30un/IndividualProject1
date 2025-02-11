@@ -307,23 +307,25 @@ const MyFullCalendar = () => {
         <ModalOverlay onClick={() => setIsRoutineModalOpen(false)}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
             <h3>루틴 관리</h3>
-            <input
-              type="text"
-              value={newRoutine}
-              onChange={(e) => setNewRoutine(e.target.value)}
-              placeholder="루틴 입력"
-            />
-            <button onClick={handleAddRoutine}>추가</button>
-            <ul>
+            <RoutineInputBox>
+              <RoutineInput
+                type="text"
+                value={newRoutine}
+                onChange={(e) => setNewRoutine(e.target.value)}
+                placeholder="루틴 입력"
+              />
+              <RoutineButton onClick={handleAddRoutine}>✅</RoutineButton>
+            </RoutineInputBox>
+            <RoutineList>
               {(routines[selectedEvent?.id] || []).map((routine, index) => (
-                <li key={index}>
+                <RoutineItem key={index}>
                   {routine}
-                  <button onClick={() => handleDeleteRoutine(routine)}>
-                    삭제
-                  </button>
-                </li>
+                  <RoutineButton onClick={() => handleDeleteRoutine(routine)}>
+                    ❎
+                  </RoutineButton>
+                </RoutineItem>
               ))}
-            </ul>
+            </RoutineList>
           </ModalContent>
         </ModalOverlay>
       )}
@@ -513,4 +515,43 @@ const EventText = styled.span`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+`;
+
+const RoutineButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  align-items: center;
+`;
+
+const RoutineList = styled.ul`
+  list-style: none;
+  padding: 0;
+`;
+
+const RoutineInput = styled.input`
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box; /* 패딩 포함 높이 유지 */
+`;
+
+const RoutineItem = styled.li`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px;
+  background-color: #f5f5f7;
+  border-radius: 4px;
+  margin: 5px 0;
+  padding: 8px;
+`;
+
+const RoutineInputBox = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
 `;
