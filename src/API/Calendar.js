@@ -286,21 +286,22 @@ const MyFullCalendar = () => {
       {isModalOpen && (
         <ModalOverlay onClick={() => setIsModalOpen(false)}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
-            <h3>이벤트 수정</h3>
-            <input
+            <ModalTitle>이벤트 수정</ModalTitle>
+            <ModalInput
               type="text"
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
             />
             <ButtonGroup>
               <button onClick={toggleHealthMode}>
-                {healthEvents.has(selectedEvent?.id)
-                  ? "헬스 모드 해제"
-                  : "헬스 모드 등록"}
+                {healthEvents.has(selectedEvent?.id) ? "해제" : "헬스 모드 🔥"}
               </button>
-              <button onClick={() => setIsRoutineModalOpen(true)}>
-                루틴 관리
-              </button>
+              {healthEvents.has(selectedEvent?.id) && (
+                <button onClick={() => setIsRoutineModalOpen(true)}>
+                  루틴 관리
+                </button>
+              )}
+
               <button onClick={handleUpdateEvent}>수정</button>
               <button onClick={handleDeleteEvent}>삭제</button>
               <CloseButton onClick={() => setIsModalOpen(false)}>
@@ -314,7 +315,7 @@ const MyFullCalendar = () => {
       {isRoutineModalOpen && (
         <ModalOverlay onClick={() => setIsRoutineModalOpen(false)}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
-            <H3Title>루틴 관리</H3Title> {/* 중앙 정렬된 h3 */}
+            <RoutineTitle>루틴 관리</RoutineTitle>
             <CloseButton onClick={() => setIsRoutineModalOpen(false)}>
               ✖️
             </CloseButton>
@@ -325,6 +326,12 @@ const MyFullCalendar = () => {
                 value={newRoutine}
                 onChange={(e) => setNewRoutine(e.target.value)}
                 placeholder="루틴 입력"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault(); // 폼 제출 방지
+                    handleAddRoutine();
+                  }
+                }}
               />
               <RoutineButton onClick={handleAddRoutine}>✅</RoutineButton>
             </RoutineInputBox>
@@ -426,6 +433,7 @@ const ButtonGroup = styled.div`
   button:nth-child(1) {
     background: #4caf50;
     color: white;
+    font-size: 12px;
   }
   button:nth-child(2) {
     background: #f44336;
@@ -554,13 +562,12 @@ const RoutineList = styled.ul`
 const RoutineInput = styled.input`
   margin-top: 10px;
   align-self: center;
-width: 100%;
+  width: 100%;
   padding: 8px;
   margin-bottom: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box; /* 패딩 포함 높이 유지 */
-  wi
 `;
 
 const RoutineItem = styled.li`
@@ -603,9 +610,22 @@ const CloseButton = styled.button`
   }
 `;
 
-const H3Title = styled.h3`
+const RoutineTitle = styled.h3`
   position: absolute;
   top: 10px;
+  left: 50%;
+  transform: translateX(-50%); /* 수평 중앙 정렬 */
+  margin: 0;
+  font-size: 18px; /* 필요에 따라 크기 조정 */
+`;
+
+const ModalInput = styled.input`
+  margin-top: 40px;
+`;
+
+const ModalTitle = styled.h3`
+  position: absolute;
+  top: 20px;
   left: 50%;
   transform: translateX(-50%); /* 수평 중앙 정렬 */
   margin: 0;
