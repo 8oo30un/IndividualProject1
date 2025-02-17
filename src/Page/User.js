@@ -9,16 +9,17 @@ import {
   getDocs,
   deleteDoc,
 } from "firebase/firestore";
-import styled from "styled-components";
+import styled, { createGlobalStyle } from "styled-components";
 import MyFullCalendar from "../API/Calendar";
 import EventContainer from "../API/EventContainer";
 import RightBar from "../Component/RightBar";
 import {
+  darkModeState,
   selectedDateState,
   selectedEventsState,
   selectedRoutinesState,
 } from "../State/recoilAtoms"; // recoil 상태 import
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 
 const UserPage = () => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const UserPage = () => {
   const [selectedEvents, setSelectedEvents] =
     useRecoilState(selectedEventsState);
   const [routines, setRoutines] = useRecoilState(selectedRoutinesState);
+  const darkMode = useRecoilValue(darkModeState); // 다크모드 상태 가져오기
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -86,15 +88,26 @@ const UserPage = () => {
     }
   };
 
+  const GlobalStyle = createGlobalStyle`
+  body {
+    background-color: ${({ darkMode }) => (darkMode ? "#111" : "#f5f5f5")};
+    color: ${({ darkMode }) => (darkMode ? "#f5f5f5" : "#000")};
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+  }
+`;
+
   return (
     <div>
+      <GlobalStyle darkMode={darkMode} />
       {user ? (
         <div>
           <SideBar />
           <RightBar />
-          <PageConatainer>
-            <FunctionConatianer>
-              <CalendarConatainer>
+          <PageConatainer darkMode={darkMode}>
+            <FunctionConatianer darkMode={darkMode}>
+              <CalendarConatainer darkMode={darkMode}>
                 {/* MyFullCalendar에서 날짜와 이벤트 상태를 부모로 전달 */}
                 <MyFullCalendar
                   setSelectedDate={setSelectedDate}
@@ -102,16 +115,16 @@ const UserPage = () => {
                 />
               </CalendarConatainer>
 
-              <RightContainer>
-                <TodayContainer>
+              <RightContainer darkMode={darkMode}>
+                <TodayContainer darkMode={darkMode}>
                   <EventContainer
                     selectedDate={selectedDate || "선택된 날짜가 없습니다"}
                     selectedEvents={selectedEvents || []}
                     routines={routines || []} // 추가
                   />
                 </TodayContainer>
-                <MemoContainer>
-                  <AddMemoBox>
+                <MemoContainer darkMode={darkMode}>
+                  <AddMemoBox darkMode={darkMode}>
                     <input
                       type="text"
                       value={memo}
@@ -127,7 +140,7 @@ const UserPage = () => {
                         <li key={memory.id}>
                           {memory.content}
                           <button onClick={() => handleDeleteMemo(memory.id)}>
-                            삭제
+                            ✖️
                           </button>
                         </li>
                       ))}
@@ -149,16 +162,14 @@ const PageConatainer = styled.div`
   margin-top: 40px;
   margin-left: 70px;
   margin-right: 70px;
-  /* border: 10px solid red; */
-  /* z-index: 900; */
+  background-color: ${({ darkMode }) => (darkMode ? "#2c2c2c" : "#fff")};
+  color: ${({ darkMode }) => (darkMode ? "#f5f5f5" : "#000")};
 `;
 
 const CalendarConatainer = styled.div`
-  border: 1px solid black;
-  /* display: flex; */
-
-  align-content: center;
+  border: 1px solid ${({ darkMode }) => (darkMode ? "#444" : "#ccc")};
   width: 70%;
+  background-color: ${({ darkMode }) => (darkMode ? "#333" : "#f9f9f9")};
 `;
 
 const FunctionConatianer = styled.div`
@@ -166,13 +177,15 @@ const FunctionConatianer = styled.div`
   display: flex;
   /* width: 2000px; */
   align-content: space-between;
+  background-color: ${({ darkMode }) => (darkMode ? "#444" : "#fff")};
 `;
 
 const RightContainer = styled.div`
-  border: 1px solid black;
+  // border: 1px solid black;
   display: flex;
   flex-direction: column;
   width: 30%;
+  background-color: ${({ darkMode }) => (darkMode ? "#222" : "#fff")};
 `;
 
 const TodayContainer = styled.div`
@@ -185,6 +198,7 @@ const MemoContainer = styled.div`
   width: 100%; /* 또는 원하는 너비 */
   /* padding: 10px; */
   flex-direction: column;
+  background-color: ${({ darkMode }) => (darkMode ? "#222" : "#fff")};
 
   ul {
     padding: 10px;
@@ -197,7 +211,7 @@ const MemoContainer = styled.div`
     li {
       width: 48.5%; /* 메모 항목의 가로 크기 */
       min-height: 70px; /* 최소 높이를 설정 */
-      background-color: #eddfe0;
+      background-color: ${({ darkMode }) => (darkMode ? "#333" : "#eddfe0")};
       margin-bottom: 8px;
       font-weight: bold;
       display: flex;
@@ -214,14 +228,15 @@ const MemoContainer = styled.div`
         bottom: 5px; /* li의 하단에서 5px 위에 배치 */
         right: 5px; /* li의 우측에서 5px 안쪽에 배치 */
         border-radius: 20px;
-        border: 1px solid rgb(120, 129, 140);
+        background-color: ${({ darkMode }) => (darkMode ? "#888" : "")};
+        border: none;
       }
     }
   }
 
   p {
     font-style: italic;
-    color: #999;
+    color: ${({ darkMode }) => (darkMode ? "#aaa" : "#999")};
   }
 `;
 
@@ -236,8 +251,10 @@ const AddMemoBox = styled.div`
     height: 20px; /* 세로 크기 늘리기 */
     padding: 10px;
     font-size: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid ${({ darkMode }) => (darkMode ? "#666" : "#ccc")};
     border-radius: 5px;
+    background-color: ${({ darkMode }) => (darkMode ? "#333" : "#fff")};
+    color: ${({ darkMode }) => (darkMode ? "#f5f5f5" : "#000")};
     margin-right: 10px; /* 버튼과 간격 */
   }
 
@@ -247,14 +264,15 @@ const AddMemoBox = styled.div`
     height: 40px; /* 버튼 세로 크기 */
     padding: 10px;
     font-size: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid ${({ darkMode }) => (darkMode ? "#666" : "#ccc")};
     border-radius: 5px;
-    background-color: #f0f0f0;
+    background-color: ${({ darkMode }) => (darkMode ? "#333" : "#f0f0f0")};
     cursor: pointer;
+    color: ${({ darkMode }) => (darkMode ? "#f5f5f5" : "#000")};
   }
 
   button:hover {
-    background-color: #e0e0e0;
+    background-color: ${({ darkMode }) => (darkMode ? "#444" : "#e0e0e0")};
   }
 `;
 

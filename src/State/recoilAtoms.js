@@ -16,3 +16,8 @@ export const selectedRoutinesState = atom({
   key: "selectedRoutinesState",
   default: {},
 });
+
+export const darkModeState = atom({
+  key: "darkModeState", // 고유한 key를 설정
+  default: JSON.parse(localStorage.getItem("darkMode") || "false"), // 로컬 스토리지에서 상태 불러오기
+});

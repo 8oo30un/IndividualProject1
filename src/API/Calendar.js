@@ -15,6 +15,7 @@ import {
   deleteRoutine,
 } from "../Page/firebase";
 import {
+  darkModeState,
   selectedDateState,
   selectedEventsState,
   selectedRoutinesState,
@@ -31,6 +32,7 @@ const MyFullCalendar = () => {
   const [maxRowHeight, setMaxRowHeight] = useState(0);
   const [newRoutine, setNewRoutine] = useState("");
   const [healthEvents, setHealthEvents] = useState(new Set()); // 헬스 이벤트 ID 저장
+  const [darkMode, setDarkMode] = useRecoilState(darkModeState); // 다크 모드 상태 사용
 
   // Recoil 상태 사용
   const [selectedDate, setSelectedDate] = useRecoilState(selectedDateState);
@@ -246,10 +248,22 @@ const MyFullCalendar = () => {
     setHealthEvents(updatedHealthEvents);
   };
 
+  const toggleDarkMode = () => {
+    setDarkMode((prev) => {
+      const newDarkMode = !prev;
+      localStorage.setItem("darkMode", newDarkMode); // 상태 변경 시 로컬 스토리지에 저장
+      return newDarkMode;
+    });
+  };
+
   return (
-    <Container isEditMode={isEditMode}>
+    <Container isEditMode={isEditMode} darkMode={darkMode}>
       <CalendarWrapper>
-        <GlobalStyles maxRowHeight={maxRowHeight} />
+        <GlobalStyles
+          maxRowHeight={maxRowHeight}
+          darkMode={darkMode}
+          isEditMode={isEditMode}
+        />
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
@@ -262,7 +276,7 @@ const MyFullCalendar = () => {
           aspectRatio={1.5}
           themeSystem="standard"
           headerToolbar={{
-            left: "prev,next today editButton",
+            left: "prev,next editButton",
             center: "title",
             right: "dayGridMonth,dayGridWeek,dayGridDay",
           }}
@@ -358,12 +372,61 @@ const Container = styled.div`
   position: relative;
   width: 100%;
   height: 100vh;
-  background: ${({ isEditMode }) => (isEditMode ? "#B7B7B7" : "#F5F5F7")};
+  background: ${({ isEditMode, darkMode }) =>
+    darkMode ? "#222" : isEditMode ? "#B7B7B7" : "#F5F5F7"};
+  color: ${({ darkMode }) => (darkMode ? "#f5f5f5" : "#222")};
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   transition: background 0.3s;
+`;
+
+const GlobalStyles = createGlobalStyle`
+  .fc-button {
+    background-color: ${({ darkMode }) =>
+      darkMode ? "#444" : "#705C53"} !important;
+    border: none !important;
+    color: ${({ darkMode }) => (darkMode ? "#f5f5f5" : "white")} !important;
+    padding: 8px 10px !important;
+    border-radius: 4px !important;
+    font-size: 14px !important;
+        height: 35px !important; /* 버튼 높이 조절 */
+
+  }
+
+   .fc-button-group {
+    gap: 8px !important; /* 버튼 간격 조정 */
+  }
+
+  .fc-button:hover {
+    background-color: ${({ darkMode }) =>
+      darkMode ? "#666" : "#9a9a9a"} !important;
+  }
+
+  .today-cell {
+    background-color: #b7b7b7 !important;
+  }
+
+  .fc-event-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .fc-daygrid-day {
+    height: ${(props) => props.maxRowHeight}px !important;
+background-color: ${({ isEditMode, darkMode }) =>
+  darkMode ? "#222" : isEditMode ? "#b7b7b7" : "#f5f5f5"};
+    color: ${({ darkMode }) => (darkMode ? "#f5f5f5" : "#333")};
+  }
+
+    /* 날짜 셀에 호버 효과 추가 */
+  .hoverable-cell:hover {
+    background-color: ${({ darkMode }) =>
+      darkMode ? "#555" : "#e0e0e0"} !important;
+    transition: background-color 0.3s ease;
+  }
 `;
 
 const CalendarWrapper = styled.div`
@@ -445,47 +508,6 @@ const ButtonGroup = styled.div`
 
   button:hover {
     opacity: 0.8;
-  }
-`;
-
-const GlobalStyles = createGlobalStyle`
-  .fc-button {
-    background-color: #705C53 !important;
-    border: none !important;
-    color: white !important;
-    padding: 8px 10px !important;
-    border-radius: 4px !important;
-    font-size: 14px !important;
-        height: 35px !important; /* 버튼 높이 조절 */
-
-  }
-
-   .fc-button-group {
-    gap: 8px !important; /* 버튼 간격 조정 */
-  }
-
-  .fc-button:hover {
-    background-color: #9a9a9a !important;
-  }
-
-  .today-cell {
-    background-color: #b7b7b7 !important;
-  }
-
-  .fc-event-title {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .fc-daygrid-day {
-    height: ${(props) => props.maxRowHeight}px !important;
-  }
-
-    /* 날짜 셀에 호버 효과 추가 */
-  .hoverable-cell:hover {
-    background-color: #e0e0e0 !important; /* 원하는 색상으로 변경 */
-    transition: background-color 0.3s ease;
   }
 `;
 
