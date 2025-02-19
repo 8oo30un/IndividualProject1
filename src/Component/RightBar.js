@@ -14,7 +14,7 @@ const RightBar = () => {
   };
 
   return (
-    <MainContainer>
+    <MainContainer darkMode={darkMode}>
       <Box1>홈</Box1>
       <Box2>운동</Box2>
       <DarkModeButton onClick={toggleDarkMode}>
@@ -25,8 +25,9 @@ const RightBar = () => {
 };
 
 const MainContainer = styled.div`
-  border: 1px solid black;
-
+  // background-color: #b7b7b7;
+  background-color: ${({ darkMode }) => (darkMode ? "#444" : "#b7b7b7")};
+  border-radius: 4px;
   right: 0;
   top: 15%;
   display: flex;
@@ -49,8 +50,10 @@ const Box2 = styled.div`
 
 const DarkModeButton = styled.button`
   margin-top: 10px;
-  padding: 10px;
-  background-color: ${({ darkMode }) => (darkMode ? "#444" : "#705C53")};
+  padding: 2px;
+  margin: 5px;
+  font-size: 12px;
+  background-color: ${({ darkMode }) => (darkMode ? "#444" : "#666")};
   color: ${({ darkMode }) => (darkMode ? "#f5f5f5" : "#fff")};
   border: none;
   cursor: pointer;
@@ -58,7 +61,7 @@ const DarkModeButton = styled.button`
   border-radius: 4px;
 
   &:hover {
-    background-color: ${({ darkMode }) => (darkMode ? "#666" : "#9a9a9a")};
+    background-color: ${({ darkMode }) => (darkMode ? "#888" : "#9a9a9a")};
   }
 `;
 

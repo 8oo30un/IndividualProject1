@@ -60,9 +60,9 @@ export default EventContainer;
 // Styled Components
 const Container = styled.div`
   height: 100%;
-  border: 1px solid ${({ darkMode }) => (darkMode ? "#444" : "#ccc")};
-  // border-radius: 8px;
-  background-color: ${({ darkMode }) => (darkMode ? "#222" : "#f9f9f9")};
+  // border: 1px solid ${({ darkMode }) => (darkMode ? "#444" : "#ccc")};
+  border-radius: 8px;
+  background-color: ${({ darkMode }) => (darkMode ? "#222" : "white")};
   color: ${({ darkMode }) => (darkMode ? "#f5f5f5" : "black")};
 
   h3 {

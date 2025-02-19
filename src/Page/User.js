@@ -99,7 +99,7 @@ const UserPage = () => {
 `;
 
   return (
-    <div>
+    <MainContainer>
       <GlobalStyle darkMode={darkMode} />
       {user ? (
         <div>
@@ -154,9 +154,14 @@ const UserPage = () => {
       ) : (
         <p>로그인 중...</p>
       )}
-    </div>
+    </MainContainer>
   );
 };
+
+const MainContainer = styled.div`
+  display: flex;
+  // border: 10px solid black;
+`;
 
 const PageConatainer = styled.div`
   margin-top: 40px;
@@ -167,9 +172,16 @@ const PageConatainer = styled.div`
 `;
 
 const CalendarConatainer = styled.div`
-  border: 1px solid ${({ darkMode }) => (darkMode ? "#444" : "#ccc")};
+  display: flex;
+  flex-direction: column; /* 세로로 정렬 */
+  justify-content: flex-start;
   width: 70%;
+  min-height: 100vh; /* 부모 컨테이너 최소 높이 설정 */
+  height: auto; /* 내용에 맞춰 확장 */
+  // border: 1px solid ${({ darkMode }) => (darkMode ? "#444" : "#ccc")};
   background-color: ${({ darkMode }) => (darkMode ? "#333" : "#f9f9f9")};
+  overflow: visible; /* 내부 요소가 넘쳐도 보이도록 설정 */
+  //지금 배경이 캘린더 높이에 같이 안늘어남
 `;
 
 const FunctionConatianer = styled.div`

@@ -299,12 +299,16 @@ const MyFullCalendar = () => {
 
       {isModalOpen && (
         <ModalOverlay onClick={() => setIsModalOpen(false)}>
-          <ModalContent onClick={(e) => e.stopPropagation()}>
+          <ModalContent
+            onClick={(e) => e.stopPropagation()}
+            darkMode={darkMode}
+          >
             <ModalTitle>이벤트 수정</ModalTitle>
             <ModalInput
               type="text"
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
+              darkMode={darkMode}
             />
             <ButtonGroup>
               <button onClick={toggleHealthMode}>
@@ -328,7 +332,10 @@ const MyFullCalendar = () => {
 
       {isRoutineModalOpen && (
         <ModalOverlay onClick={() => setIsRoutineModalOpen(false)}>
-          <ModalContent onClick={(e) => e.stopPropagation()}>
+          <ModalContent
+            onClick={(e) => e.stopPropagation()}
+            darkMode={darkMode}
+          >
             <RoutineTitle>루틴 관리</RoutineTitle>
             <CloseButton onClick={() => setIsRoutineModalOpen(false)}>
               ✖️
@@ -346,12 +353,13 @@ const MyFullCalendar = () => {
                     handleAddRoutine();
                   }
                 }}
+                darkMode={darkMode}
               />
               <RoutineButton onClick={handleAddRoutine}>✅</RoutineButton>
             </RoutineInputBox>
             <RoutineList>
               {(routines[selectedEvent?.id] || []).map((routine, index) => (
-                <RoutineItem key={index}>
+                <RoutineItem key={index} darkMode={darkMode}>
                   <RoutineText>{routine}</RoutineText>
                   <RoutineButton onClick={() => handleDeleteRoutine(routine)}>
                     ❎
@@ -379,7 +387,7 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: background 0.3s;
+  // transition: background 0.3s;
 `;
 
 const GlobalStyles = createGlobalStyle`
@@ -424,7 +432,7 @@ background-color: ${({ isEditMode, darkMode }) =>
     /* 날짜 셀에 호버 효과 추가 */
   .hoverable-cell:hover {
     background-color: ${({ darkMode }) =>
-      darkMode ? "#555" : "#e0e0e0"} !important;
+      darkMode ? "#444" : "#e0e0e0"} !important;
     transition: background-color 0.3s ease;
   }
 `;
@@ -451,7 +459,7 @@ const ModalOverlay = styled.div`
 `;
 
 const ModalContent = styled.div`
-  background: white;
+  background: ${({ darkMode }) => (darkMode ? "#222" : "white")};
   padding: 20px;
   padding-right: 37px;
   border-radius: 8px;
@@ -470,14 +478,6 @@ const ModalContent = styled.div`
   // font-size: 18px; /* 필요에 따라 크기 조정 */
     
   // }
-
-  input {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
 `;
 
 const ButtonGroup = styled.div`
@@ -515,16 +515,25 @@ const EventWrapper = styled.div`
   background-color: ${(props) => (props.isHealth ? "#FF6B6B" : "#705C53")};
   color: white;
   padding: 5px;
-  border-radius: 4px;
+  // border-radius: 8px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
-  position: relative; /* 부모 요소에서 툴팁을 절대 위치로 설정하기 위해 relative 추가 */
-  z-index: 10; /* EventWrapper의 z-index 추가 */
+  position: relative;
+  z-index: 10;
 
-  /* 부모 요소의 overflow가 hidden이라면 visible로 설정 */
-  overflow: visible;
+  /* 포커스 테두리 제거 */
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+
+  &:focus,
+  &:active {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
 
   &:hover::after {
     content: attr(data-tooltip); /* data-tooltip 속성을 툴팁으로 표시 */
@@ -587,9 +596,11 @@ const RoutineInput = styled.input`
   width: 100%;
   padding: 8px;
   margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
   box-sizing: border-box; /* 패딩 포함 높이 유지 */
+  border: 1px solid ${({ darkMode }) => (darkMode ? "#666" : "#ccc")};
+  border-radius: 5px;
+  background-color: ${({ darkMode }) => (darkMode ? "#333" : "#fff")};
+  color: ${({ darkMode }) => (darkMode ? "#f5f5f5" : "#000")};
 `;
 
 const RoutineItem = styled.li`
@@ -598,9 +609,12 @@ const RoutineItem = styled.li`
   align-items: center;
   padding: 5px;
   background-color: #f5f5f7;
-  border-radius: 4px;
   margin: 5px 0;
   padding: 8px;
+  border: 1px solid ${({ darkMode }) => (darkMode ? "#666" : "#ccc")};
+  border-radius: 5px;
+  background-color: ${({ darkMode }) => (darkMode ? "#333" : "#fff")};
+  color: ${({ darkMode }) => (darkMode ? "#f5f5f5" : "#000")};
 `;
 
 const RoutineInputBox = styled.div`
@@ -643,6 +657,12 @@ const RoutineTitle = styled.h3`
 
 const ModalInput = styled.input`
   margin-top: 40px;
+  font-size: 14px;
+  border: 1px solid ${({ darkMode }) => (darkMode ? "#666" : "#ccc")};
+  border-radius: 5px;
+  background-color: ${({ darkMode }) => (darkMode ? "#333" : "#fff")};
+  color: ${({ darkMode }) => (darkMode ? "#f5f5f5" : "#000")};
+  margin-right: 10px; /* 버튼과 간격 */
 `;
 
 const ModalTitle = styled.h3`
