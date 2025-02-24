@@ -1,6 +1,7 @@
 import { useRecoilState } from "recoil";
 import styled from "styled-components";
 import { darkModeState } from "../State/recoilAtoms";
+import { useEffect } from "react";
 
 const RightBar = () => {
   const [darkMode, setDarkMode] = useRecoilState(darkModeState); // 다크 모드 상태 사용
@@ -13,9 +14,27 @@ const RightBar = () => {
     });
   };
 
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://cdn.lordicon.com/lordicon.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
   return (
     <MainContainer darkMode={darkMode}>
-      <Box1>홈</Box1>
+      <Box1>
+        <lord-icon
+          src="https://cdn.lordicon.com/wmwqvixz.json"
+          trigger="hover"
+          colors={darkMode ? "primary:#ffffff" : "primary:#705C53"}
+          style={{ width: "25px", height: "25px" }}
+        ></lord-icon>
+      </Box1>
       <Box2>운동</Box2>
       <DarkModeButton onClick={toggleDarkMode}>
         {darkMode ? "Light Mode" : "Dark Mode"}

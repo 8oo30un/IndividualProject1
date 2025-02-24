@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "../Page/firebase";
 import { darkModeState } from "../State/recoilAtoms";
 import { useRecoilValue } from "recoil";
+import { useEffect } from "react";
 
 const SideBar = () => {
   const user = useUser();
@@ -16,9 +17,27 @@ const SideBar = () => {
   };
   const darkMode = useRecoilValue(darkModeState); // 다크모드 상태 가져오기
 
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://cdn.lordicon.com/lordicon.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
   return (
     <Container darkMode={darkMode}>
-      <div>홈</div>
+      <div>
+        <lord-icon
+          src="https://cdn.lordicon.com/wmwqvixz.json"
+          trigger="hover"
+          colors={darkMode ? "primary:#ffffff" : "primary:#705C53"}
+          style={{ width: "25px", height: "25px" }}
+        ></lord-icon>
+      </div>
       <div>기록보기</div>
       <div>메뉴2</div>
       <div>메뉴3</div>
